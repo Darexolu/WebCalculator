@@ -1,7 +1,7 @@
-﻿@model createWebApplicationCalculator.Models.CalculatorModel
+﻿@model CalculatorModel
 <html lang="en">
 <head>
-
+    @* <link rel="stylesheet" href="~/css/CalculatorStyleSheet.css" /> *@
     
 </head>
 <body>
@@ -12,17 +12,117 @@
         </div>
         <div class="container aux">
             <button class="auxillary" value="AC">AC</button>
-            <button class="auxillary" value="+/-*">+/-*</button>
-            <button class="auxillary" value="%">%</button>
+            <button class="auxillary" value="+/-*">+/-*</button>            
         </div>
+        <button class="clear-button" value="C">C</button>
     <div class="container operators">
-        <button class="operator" name="operation" value="/">/</button>
+            <button class="operator" value="%">%</button>
+            <button class="operator" name="operation" value="/">/</button>
          <button class="operator" name="operation" value="+">+</button>
         <button class="operator" name="operation" value="-">-</button>
-         <button class="operator" name="operation" value="">+</button>
+         <button class="operator" name="operation" value="*">*</button>
+            <button class="operator" name="operation" value="=">=</button>
     </div>
+        <div class="container numbers">
+            <button  name="number" value="7">7</button>
+            <button  name="number" value="8">8</button>
+            <button name="number" value="9">9</button>
+            <button  name="number" value="4">4</button>
+            <button  name="number" value="5">5</button>
+            <button  name="number" value="6">6</button>
+            <button  name="number" value="1">1</button>
+            <button  name="number" value="2">2</button>
+            <button name="number" value="3">3</button>
+            <button id="zero" name="number" value="0">0</button>
+            <button name="number" value=".">.</button>
+        </div>
     </div>
+
+
+   
 </body>
 
 
 </html>
+@section scripts{
+ <script>
+        $(document).ready(function () {
+            var expression = ""; // variable to store the expression
+            var result = null; // variable to store the result
+            function clearScreen() {
+                expression = ""; // Clear the expression
+                result = null; // Reset the result
+                $("#display").text(""); // Clear the screen
+            }
+            $(".numbers button, .operators button").click(function () {
+                var value = $(this).attr("value");
+                //if there is a result from the previous calculation, use it in the new expression
+                if (result !== null) {
+                    expression = result + value;
+                    result = null; // Reset the result
+                }
+                else {
+                    expression += value; //Append clicked  value to the expression
+                }
+                $("#display").text(expression); // Update the screen
+            });
+            // Handle = button click
+            $(".operators button[value='=']").click(function () {
+                // Remove the '=' operator from the expression before sending it to the server
+                var expressionToSend = expression.replace("=", "");
+
+                $.ajax({
+                    type: "POST",
+                    url: "/Calculator/Calculate",
+                    data: { expression: expressionToSend },
+                    success: function (response) {
+                        // Update the screen with the result returned from the server
+                        $("#display").text(response.result);
+                        if (response.result === "Error: Division by zero" ||
+                        response.result === "Invalid expression"
+                        || response.result === "Invalid operator") {
+                            $("#display").text(response.result);
+
+                            // Set a timeout to clear the error message after 3 seconds
+                            setTimeout(function () {
+                                clearScreen();
+                              
+                            }, 3000);
+                            
+                        }
+                        
+                            result = response.result; // Store the result for future calculations
+                            expression = response.result; // Update the expression with the result
+                        
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+            });
+            
+            // Handle AC button click
+            // $(".aux button, .auxillary button").click(function () {
+            //     expression = ""; // Clear the expression
+            //     result = null; // Reset the result
+            //     $("#display").text(""); // Clear the screen
+            // });
+            $(".aux button, .auxillary button").click(clearScreen);
+            // Handle C button click
+            $(".clear-button").click(function () {
+                // Remove the last character from the display
+                var newExpression = $("#display").text().slice(0, -1);
+
+                // Update the display with the new expression
+                 $("#display").text(newExpression);
+
+                if (newExpression === "") {
+                    clearScreen()
+                }
+               
+            });
+
+        });
+        
+    </script>
+    }
