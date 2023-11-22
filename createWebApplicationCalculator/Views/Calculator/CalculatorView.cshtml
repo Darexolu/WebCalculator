@@ -49,11 +49,28 @@
         $(document).ready(function () {
             var expression = ""; // variable to store the expression
             var result = null; // variable to store the result
+
+            //===========Functions======
             function clearScreen() {
                 expression = ""; // Clear the expression
                 result = null; // Reset the result
                 $("#display").text(""); // Clear the screen
             }
+           
+            function clearDeleted() {              
+                // Remove the last character from the expression
+                        var newExpression = $("#display").text().slice(0, -1);            
+            }
+            function scrollContentToLeft() {
+                var displayElement = document.getElementById('display');
+
+                if (displayElement.scrollWidth > displayElement.clientWidth) {
+                    // Content overflows, scroll to the left
+                    displayElement.scrollLeft = displayElement.scrollWidth;
+                }
+            }
+            //=======Functions===========
+
             $(".numbers button, .operators button").click(function () {
                 var value = $(this).attr("value");
                 //if there is a result from the previous calculation, use it in the new expression
@@ -62,9 +79,12 @@
                     result = null; // Reset the result
                 }
                 else {
-                    expression += value; //Append clicked  value to the expression
+                     expression = $("#display").text();
+                    
+                     expression += value; //Append clicked  value to the expression
+                    $("#display").text(expression);
                 }
-                $("#display").text(expression); // Update the screen
+              // Update the screen
             });
             // Handle = button click
             $(".operators button[value='=']").click(function () {
@@ -90,10 +110,9 @@
                             }, 3000);
                             
                         }
-                        
+                        setInterval(scrollContentToLeft, 100);
                             result = response.result; // Store the result for future calculations
                             expression = response.result; // Update the expression with the result
-                        
                     },
                     error: function (error) {
                         console.log(error);
@@ -117,9 +136,11 @@
                  $("#display").text(newExpression);
 
                 if (newExpression === "") {
-                    clearScreen()
+                    clearScreen();
+                 }
+                 else  {
+                    clearDeleted();
                 }
-               
             });
 
         });

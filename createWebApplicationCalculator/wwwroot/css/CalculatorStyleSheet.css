@@ -25,9 +25,7 @@
         "n n n o" 1fr
     / 1fr 1fr 1fr 1fr; 
 }
-/*.operators .modulo{
-    margin-left: -200px;
-}*/
+
 .screen {
     width: auto;
     min-width: 400%;
@@ -40,7 +38,7 @@
 #display {
     max-height: 100%;
     overflow-x: hidden;
-    white-space: nowrap; /* Prevent text from wrapping to the next line */
+    white-space: nowrap /* Prevent text from wrapping to the next line */
   
 }
 .screen p{
